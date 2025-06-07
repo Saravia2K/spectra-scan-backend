@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TestAnswerValues {
+  DEFINITELY_AGREE
+  SLIGHTLY_AGREE
+  SLIGHTLY_DISAGREE
+  DEFINITELY_DISAGREE
+}
+
+model Doctor {
+  id                      Int       @id @default(autoincrement())
+  names                   String
+  last_names              String
+  email                   String
+  password                String    @db.VarChar(120)
+  request_password_change Boolean
+  registration_date       DateTime  @db.Date
+  last_login              DateTime? @db.Timestamp(6)
+  patients                Patient[]
+}
+
+model Tutor {
+  id           Int    @id @default(autoincrement())
+  patient_id   Int
+  names        String
+  last_names   String
+  email        String
+  relationship String
+
+  patient Patient @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+}
+
+model Patient {
+  id                Int      @id @default(autoincrement())
+  doctor_id         Int
+  names             String
+  last_names        String
+  age               Int
+  registration_date DateTime @default(now())
+
+  doctor Doctor        @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+  tutors Tutor[]
+  tests  PatientTest[]
+}
+
+model Test {
+  id          Int    @id @default(autoincrement())
+  name        String @db.VarChar(100)
+  description String
+  cutoff      Int
+
+  questions TestQuestion[]
+  assigned  PatientTest[]
+}
+
+model TestAnswerCategory {
+  id        Int            @id @default(autoincrement())
+  name      String
+  questions TestQuestion[]
+}
+
+model TestQuestion {
+  id              Int                @id @default(autoincrement())
+  test_id         Int
+  category_id     Int
+  text            String
+  scorable_values TestAnswerValues[] // Enum array
+
+  test     Test                @relation(fields: [test_id], references: [id], onDelete: Cascade)
+  category TestAnswerCategory  @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  answers  PatientTestAnswer[]
+}
+
+model PatientTest {
+  id          Int      @id @default(autoincrement())
+  patient_id  Int
+  test_id     Int
+  token       String   @unique
+  access_code String   @db.VarChar(5)
+  total_score Int?
+  details     Json?
+  created_at  DateTime @default(now())
+
+  patient Patient             @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  test    Test                @relation(fields: [test_id], references: [id], onDelete: Cascade)
+  answers PatientTestAnswer[]
+}
+
+model PatientTestAnswer {
+  id               Int              @id @default(autoincrement())
+  patient_test_id  Int
+  test_question_id Int
+  value            TestAnswerValues
+
+  patient_test PatientTest  @relation(fields: [patient_test_id], references: [id], onDelete: Cascade)
+  question     TestQuestion @relation(fields: [test_question_id], references: [id], onDelete: Cascade)
+}
