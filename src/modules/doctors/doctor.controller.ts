@@ -45,7 +45,7 @@ export class DoctorController {
     description: 'Doctor encontrado',
     type: DoctorEntity,
   })
-  findOne(@Param('id') id: string): Promise<Doctor> {
+  findOne(@Param('id') id: string): Promise<Omit<Doctor, 'password'>> {
     return this.doctorService.findOne(+id);
   }
 

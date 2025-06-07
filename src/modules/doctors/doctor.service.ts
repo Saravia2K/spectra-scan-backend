@@ -21,8 +21,11 @@ export class DoctorService {
     });
   }
 
-  async findOne(id: number): Promise<Doctor> {
-    const doctor = await this.prisma.doctor.findUnique({ where: { id } });
+  async findOne(id: number): Promise<Omit<Doctor, 'password'>> {
+    const doctor = await this.prisma.doctor.findUnique({
+      where: { id },
+      select: this.prisma.exclude('Doctor', ['password']),
+    });
     if (!doctor) throw new NotFoundException('Doctor not found');
     return doctor;
   }
