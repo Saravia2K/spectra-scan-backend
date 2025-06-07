@@ -25,7 +25,7 @@ model Doctor {
   id                      Int       @id @default(autoincrement())
   names                   String
   last_names              String
-  email                   String
+  email                   String    @unique
   password                String    @db.VarChar(120)
   request_password_change Boolean
   registration_date       DateTime  @db.Date

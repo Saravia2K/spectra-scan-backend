@@ -7,8 +7,8 @@ async function bootstrap() {
 
   const config = new DocumentBuilder().setTitle('Spectra Scan API').build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, documentFactory);
+  SwaggerModule.setup('swagger', app, documentFactory);
 
-  await app.listen(3000);
+  await app.listen(process.env.PORT ?? 8000);
 }
 bootstrap();
