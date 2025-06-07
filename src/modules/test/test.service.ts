@@ -3,6 +3,12 @@ import { PrismaService } from 'src/common/services/prisma-service/prisma-service
 import { CreateTestDto } from './dto/create-test.dto';
 import { CreatePatientTestDto } from './dto/create-patient-test.dto';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  autismTestCompletedCounter,
+  autismTestResultsCounter,
+  autismTestDurationHistogram,
+  autismTestStartedCounter,
+} from '../monitoring/metrics';
 
 @Injectable()
 export class TestService {
@@ -19,6 +25,8 @@ export class TestService {
   async createPatientTest(data: CreatePatientTestDto) {
     const token = uuidv4();
     const access_code = Math.floor(10000 + Math.random() * 90000).toString(); // 5 dígitos
+
+    autismTestStartedCounter.inc();
 
     return this.prisma.patientTest.create({
       data: {
@@ -89,6 +97,20 @@ export class TestService {
       },
     });
 
+    autismTestCompletedCounter.inc();
+
+    let level: 'low' | 'medium' | 'high';
+    if (total_score >= 30) level = 'high';
+    else if (total_score >= 15) level = 'medium';
+    else level = 'low';
+
+    autismTestResultsCounter.labels(level).inc();
+
+    const startTime = new Date(patientTest.created_at).getTime();
+    const endTime = Date.now();
+    const durationSeconds = (endTime - startTime) / 1000;
+
+    autismTestDurationHistogram.observe(durationSeconds);
     return {
       message: 'Test finalizado',
       total_score,

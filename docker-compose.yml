@@ -1,11 +1,18 @@
+version: '3.8'
+
 services:
-  postgres:
-    container_name: spectra-scan-db
-    image: postgres:16.6-alpine3.19
-    volumes:
-      - ./data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: 'admin'
-      POSTGRES_DB: 'spectra-scan'
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
     ports:
-      - 5432:5432
+      - '9090:9090'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - '3001:3000'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin

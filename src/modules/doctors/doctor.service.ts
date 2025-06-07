@@ -8,6 +8,7 @@ import { PrismaService } from '../../common/services/prisma-service/prisma-servi
 import { CreateDoctorDto, UpdateDoctorDto } from './dto/doctor.dto';
 import { Doctor } from 'generated/prisma';
 import * as bcrypt from 'bcrypt';
+import { userLoginsCounter } from '../monitoring/metrics';
 
 @Injectable()
 export class DoctorService {
@@ -81,6 +82,8 @@ export class DoctorService {
 
     const valid = await bcrypt.compare(password, doctor.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
+
+    userLoginsCounter.inc({ role: 'doctor' });
 
     return {
       message: 'Login successful',
