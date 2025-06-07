@@ -1,5 +1,19 @@
-import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiBody,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { TestQuestionService } from './test-question.service';
 import { CreateTestQuestionDto } from './dto/create-test-question.dto';
 import { UpdateTestQuestionDto } from './dto/update-test-question.dto';
@@ -83,5 +97,31 @@ export class TestQuestionController {
   })
   updateCategory(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
     return this.service.updateCategory(+id, dto);
+  }
+
+  @Get('category')
+  @ApiOperation({ summary: 'Obtener todas las categorías' })
+  @ApiResponse({ status: 200, description: 'Lista de categorías' })
+  getAllCategories() {
+    return this.service.getAllCategories();
+  }
+
+  @Delete('category/:id')
+  @ApiOperation({ summary: 'Eliminar una categoría por ID' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({
+    status: 200,
+    description: 'Categoría eliminada correctamente',
+  })
+  deleteCategory(@Param('id') id: string) {
+    return this.service.deleteCategory(+id);
+  }
+
+  @Get('category/:id')
+  @ApiOperation({ summary: 'Obtener una categoría por ID' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Categoría encontrada' })
+  getCategoryById(@Param('id') id: string) {
+    return this.service.getCategoryById(+id);
   }
 }
