@@ -57,4 +57,36 @@ export class PatientService {
     await this.prisma.patient.delete({ where: { id } });
     return { message: `Paciente ${id} eliminado correctamente` };
   }
+
+  async getPatientsByDoctor(doctor_id: number) {
+    return this.prisma.patient.findMany({
+      where: { doctor_id },
+      include: { tutors: true },
+    });
+  }
+
+  async getAllPatientTestsByDoctor(doctor_id: number) {
+    return this.prisma.patientTest.findMany({
+      where: {
+        patient: {
+          doctor_id,
+        },
+      },
+      include: {
+        patient: {
+          select: {
+            id: true,
+            names: true,
+            last_names: true,
+          },
+        },
+        test: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+  }
 }

@@ -7,7 +7,13 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiBody,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { PatientService } from './patient.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
@@ -89,5 +95,29 @@ export class PatientController {
   @ApiParam({ name: 'id', type: Number })
   remove(@Param('id') id: string) {
     return this.service.remove(+id);
+  }
+
+  @Get('by-doctor/:doctor_id')
+  @ApiOperation({ summary: 'Obtener todos los pacientes de un doctor' })
+  @ApiParam({ name: 'doctor_id', type: Number })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de pacientes con sus tutores (si existen)',
+  })
+  getByDoctor(@Param('doctor_id') doctor_id: string) {
+    return this.service.getPatientsByDoctor(+doctor_id);
+  }
+
+  @Get('tests/by-doctor/:doctor_id')
+  @ApiOperation({
+    summary: 'Obtener todos los PatientTest creados por un doctor',
+  })
+  @ApiParam({ name: 'doctor_id', type: Number })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de PatientTest con información del paciente y del test',
+  })
+  getPatientTestsByDoctor(@Param('doctor_id') doctor_id: string) {
+    return this.service.getAllPatientTestsByDoctor(+doctor_id);
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -9,6 +9,7 @@ import {
 import { TestService } from './test.service';
 import { CreateTestDto } from './dto/create-test.dto';
 import { CreatePatientTestDto } from './dto/create-patient-test.dto';
+import { UpdateTestDto } from './dto/update-test.dto';
 
 @ApiTags('Test')
 @Controller('test')
@@ -20,6 +21,14 @@ export class TestController {
   @ApiResponse({ status: 200, description: 'Lista de tests' })
   getAll() {
     return this.testService.getAllTests();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener un solo test por ID con sus preguntas' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Test encontrado con preguntas' })
+  getOne(@Param('id') id: string) {
+    return this.testService.getTestById(+id);
   }
 
   @Post()
@@ -109,5 +118,26 @@ export class TestController {
   })
   getTestQuestions(@Param('id') id: string) {
     return this.testService.getQuestionsByTest(+id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualizar un test por ID' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({
+    type: UpdateTestDto,
+    examples: {
+      default: {
+        summary: 'Ejemplo de actualización',
+        value: {
+          name: 'Test de Motricidad Actualizado',
+          description: 'Versión revisada del test de motricidad',
+          cutoff: 10,
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Test actualizado correctamente' })
+  updateTest(@Param('id') id: string, @Body() data: UpdateTestDto) {
+    return this.testService.updateTest(+id, data);
   }
 }

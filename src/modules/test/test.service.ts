@@ -3,13 +3,23 @@ import { PrismaService } from 'src/common/services/prisma-service/prisma-service
 import { CreateTestDto } from './dto/create-test.dto';
 import { CreatePatientTestDto } from './dto/create-patient-test.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { UpdateTestDto } from './dto/update-test.dto';
 
 @Injectable()
 export class TestService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAllTests() {
-    return this.prisma.test.findMany();
+    return this.prisma.test.findMany({
+      include: {
+        _count: {
+          select: { questions: true },
+        },
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    });
   }
 
   async createTest(data: CreateTestDto) {
@@ -100,6 +110,31 @@ export class TestService {
     return this.prisma.testQuestion.findMany({
       where: { test_id },
       include: { category: true },
+    });
+  }
+
+  // Obtener un solo test por ID
+  async getTestById(id: number) {
+    const test = await this.prisma.test.findUnique({
+      where: { id },
+      include: {
+        questions: {
+          include: { category: true },
+        },
+      },
+    });
+
+    if (!test) throw new NotFoundException('Test no encontrado');
+    return test;
+  }
+
+  async updateTest(id: number, data: UpdateTestDto) {
+    const exists = await this.prisma.test.findUnique({ where: { id } });
+    if (!exists) throw new NotFoundException('Test no encontrado');
+
+    return this.prisma.test.update({
+      where: { id },
+      data,
     });
   }
 }
