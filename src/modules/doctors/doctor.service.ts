@@ -14,7 +14,11 @@ export class DoctorService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Doctor[]> {
-    return this.prisma.doctor.findMany();
+    return this.prisma.doctor.findMany({
+      orderBy: {
+        id: 'asc',
+      },
+    });
   }
 
   async findOne(id: number): Promise<Doctor> {
