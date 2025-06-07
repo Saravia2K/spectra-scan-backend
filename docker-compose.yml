@@ -1,0 +1,11 @@
+services:
+  postgres:
+    container_name: spectra-scan-db
+    image: postgres:16.6-alpine3.19
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: 'admin'
+      POSTGRES_DB: 'spectra-scan'
+    ports:
+      - 5432:5432
